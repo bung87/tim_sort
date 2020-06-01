@@ -2,11 +2,11 @@ import algorithm
 
 func mergeComputeMinRun(n:int) :int= 
   var r = 0
-  result = n
+  var nn = n
   while result >= 64:
-    r = r or (result and 1)
-    result = result shr 1
-    result = result + r
+    r = r or (nn and 1)
+    nn = nn shr 1
+  result = nn + r
 
 func countRun[T](lst:openArray[T],sRun:int):(int,int,bool,int) =
   var increasing = true
