@@ -75,7 +75,7 @@ proc bisect_right[T](a: openArray[T]; x:int, lo=0, hi= -1):int =
       hi = len(a)
   
   while lo < hi:
-    mid = (lo+hi) div 2
+    mid = (lo + hi) div 2
     # Use __lt__ to match the logic in list.sort() and in heapq
     if x < a[mid]: hi = mid
     else: lo = mid+1
@@ -91,14 +91,15 @@ proc bisectLeft[T](a: openArray[T], x: T, lo: int = 0, hi: int = -1): int =
   var
     lo = lo
     hi = hi
+    mid:int
   if lo < 0:
     raise newException(ValueError, "lo must be non-negative")
   if hi == -1:
     hi = a.len
   while lo < hi:
-    let mid = (lo+hi) div 2
+    mid = (lo + hi) div 2
     if a[mid] < x:
-      lo = mid+1
+      lo = mid + 1
     else:
       hi = mid
   return lo
@@ -110,8 +111,8 @@ proc gallop[T](lst:var openArray[T];val,ll,hh:int;ltr:bool):int =
   else:
     result = bisectRight(lst, val, ll, hh)
 
-proc merge_high[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int)
-proc merge_low[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int)
+proc mergeHigh[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int)
+proc mergeLow[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int)
 
 proc merge[T](lst:var openArray[T],stack:var seq[(int, int, bool, int)],runNum:int) = 
   let index = if runNum < 0: stack.len + runNum else: runNum
@@ -124,9 +125,9 @@ proc merge[T](lst:var openArray[T],stack:var seq[(int, int, bool, int)],runNum:i
   if runA[3] <= runB[3]:
     mergeLow(lst,runA,runB,7)
   else:
-    mergehigh(lst,runA,runB,7)
+    mergeHigh(lst,runA,runB,7)
 
-proc merge_low[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int) = 
+proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int) = 
   ## Merges the two runs quasi in-place if a is the smaller run
   ## - a and b are lists that store data of runs
   ## - min_gallop: threshold needed to switch to galloping mode
@@ -282,7 +283,7 @@ proc merge_low[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
       gallop_thresh += 1
 
 
-proc merge_high[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int) =
+proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int) =
   ## Merges the two runs quasi in-place if b is the smaller run
   ## - Analogous to merge_low, but starts from the end
   ## - a and b are lists that store data of runs
@@ -303,83 +304,21 @@ proc merge_high[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, b
 
   var gallop_thresh = min_gallop
   while true:
-      var a_count = 0  # number of times a win in a row
-      var b_count = 0  # number of times b win in a row
+    var a_count = 0  # number of times a win in a row
+    var b_count = 0  # number of times b win in a row
 
-      # Linear merge, taking note of how many times a and b wins in a row.
-      # If a_count or b_count > threshold, switch to gallop
-      while i >= 0 and j >= a[0]:
-          if temp_array[i] > lst[j]:
-              lst[k] = temp_array[i]
-              k -= 1
-              i -= 1
-
-              a_count = 0
-              b_count += 1
-
-              # If b runs out during linear merge
-              if i < 0:
-                while j >= a[0]:
-                    lst[k] = lst[j]
-                    k -= 1
-                    j -= 1
-                return
-
-              if b_count >= gallop_thresh:
-                break
-
-          else:
-            lst[k] = lst[j]
-            k -= 1
-            j -= 1
-
-            a_count += 1
-            b_count = 0
-
-            # If a runs out during linear merge
-            if j < a[0]:
-              while i >= 0:
-                lst[k] = temp_array[i]
-                k -= 1
-                i -= 1
-              return
-
-            if a_count >= gallop_thresh:
-              break
-
-      # i, j, k are DECREMENTED in this case
-      var a_adv:int
-      while true:
-        # Look for the position of b[i] in a[0, j + 1]
-        # ltr = False -> uses bisect_right()
-        a_adv = gallop(lst, temp_array[i], a[0], j + 1, false)
-
-        # Copy the elements from a_adv -> j to merge area
-        # Go backwards to the index a_adv
-        for x in countdown( a_adv - 1 - 1,j):
-            lst[k] = lst[x]
-            k -= 1
-
-        # # Update the a_count to check successfulness of galloping
-        a_count = j - a_adv + 1
-
-        # Decrement index j
-        j = a_adv - 1
-
-        # If run a runs out:
-        if j < a[0]:
-          while i >= 0:
-            lst[k] = temp_array[i]
-            k -= 1
-            i -= 1
-          return
-
-        # Copy the b[i] into the merge area
+    # Linear merge, taking note of how many times a and b wins in a row.
+    # If a_count or b_count > threshold, switch to gallop
+    while i >= 0 and j >= a[0]:
+      if temp_array[i] > lst[j]:
         lst[k] = temp_array[i]
         k -= 1
         i -= 1
 
-        # If a runs out:
+        a_count = 0
+        b_count += 1
+
+        # If b runs out during linear merge
         if i < 0:
           while j >= a[0]:
             lst[k] = lst[j]
@@ -387,31 +326,18 @@ proc merge_high[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, b
             j -= 1
           return
 
-        # -------------------------------------------------
+        if b_count >= gallop_thresh:
+          break
 
-        # Look for the position of A[j] in B:
-        var b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
-        for y in countdown(b_adv - 1 - 1,i):
-          lst[k] = temp_array[y]
-          k -= 1
-
-        b_count = i - b_adv + 1
-        i = b_adv - 1
-
-        # If b runs out:
-        if i < 0:
-          while j >= a[0]:
-              lst[k] = lst[j]
-              k -= 1
-              j -= 1
-          return
-
-        # Copy the a[j] back to the merge area
+      else:
         lst[k] = lst[j]
         k -= 1
         j -= 1
 
-        # If a runs out:
+        a_count += 1
+        b_count = 0
+
+        # If a runs out during linear merge
         if j < a[0]:
           while i >= 0:
             lst[k] = temp_array[i]
@@ -419,12 +345,85 @@ proc merge_high[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, b
             i -= 1
           return
 
-        # if galloping proves to be unsuccessful, return to linear
-        if a_count < gallop_thresh and b_count < gallop_thresh:
+        if a_count >= gallop_thresh:
           break
 
-      # punishment for leaving galloping
-      gallop_thresh += 1
+    # i, j, k are DECREMENTED in this case
+    var a_adv:int
+    while true:
+      # Look for the position of b[i] in a[0, j + 1]
+      # ltr = False -> uses bisect_right()
+      a_adv = gallop(lst, temp_array[i], a[0], j + 1, false)
+
+      # Copy the elements from a_adv -> j to merge area
+      # Go backwards to the index a_adv
+      for x in countdown( a_adv - 1 - 1,j):
+          lst[k] = lst[x]
+          k -= 1
+
+      # # Update the a_count to check successfulness of galloping
+      a_count = j - a_adv + 1
+
+      # Decrement index j
+      j = a_adv - 1
+
+      # If run a runs out:
+      if j < a[0]:
+        while i >= 0:
+          lst[k] = temp_array[i]
+          k -= 1
+          i -= 1
+        return
+
+      # Copy the b[i] into the merge area
+      lst[k] = temp_array[i]
+      k -= 1
+      i -= 1
+
+      # If a runs out:
+      if i < 0:
+        while j >= a[0]:
+          lst[k] = lst[j]
+          k -= 1
+          j -= 1
+        return
+
+      # Look for the position of A[j] in B:
+      var b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
+      for y in countdown(b_adv - 1 - 1,i):
+        lst[k] = temp_array[y]
+        k -= 1
+
+      b_count = i - b_adv + 1
+      i = b_adv - 1
+
+      # If b runs out:
+      if i < 0:
+        while j >= a[0]:
+          lst[k] = lst[j]
+          k -= 1
+          j -= 1
+        return
+
+      # Copy the a[j] back to the merge area
+      lst[k] = lst[j]
+      k -= 1
+      j -= 1
+
+      # If a runs out:
+      if j < a[0]:
+        while i >= 0:
+          lst[k] = temp_array[i]
+          k -= 1
+          i -= 1
+        return
+
+      # if galloping proves to be unsuccessful, return to linear
+      if a_count < gallop_thresh and b_count < gallop_thresh:
+        break
+
+    # punishment for leaving galloping
+    gallop_thresh += 1
 
 proc merge_collapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]) =
   ## The last three runs in the stack is A, B, C.
@@ -455,9 +454,9 @@ proc merge_force_collapse[T](lst:var openArray[T], stack:var seq[(int, int, bool
   ## When the invariant holds and there are > 1 run
   ## in the stack, this function finishes the merging"""
   while len(stack) > 1:
-      # Only merges at -2, because when the invariant holds,
-      # merging would be balanced
-      merge(lst, stack, -2)
+    # Only merges at -2, because when the invariant holds,
+    # merging would be balanced
+    merge(lst, stack, -2)
 
 proc timSort*[T](lst: var openArray[T]):seq[T] = 
   # compare:proc (a: T, b: T) :int
