@@ -114,12 +114,13 @@ proc merge_high[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, 
 proc merge_low[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int)
 
 proc merge[T](lst:var openArray[T],stack:var seq[(int, int, bool, int)],runNum:int) = 
+  let index = if runNum < 0: stack.high + runNum else: runNum
   var 
-    runA = stack[runNum]
-    runB = stack[runNum + 1]
+    runA = stack[index]
+    runB = stack[index + 1]
     newRun = (run_a[0], run_b[1], true, run_b[1] - run_a[0] + 1)
-  stack[runNum] = newRun
-  stack.delete runNum + 1
+  stack[index] = newRun
+  stack.delete index + 1
   if runA[3] <= runB[3]:
     mergeLow(lst,runA,runB,7)
   else:
