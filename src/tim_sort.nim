@@ -4,8 +4,9 @@ func mergeComputeMinRun(n:int) :int=
   var r = 0
   result = n
   while result >= 64:
-    r = r or result and 1
+    r = r or (result and 1)
     result = result shr 1
+    result = result + r
 
 func countRun[T](lst:openArray[T],sRun:int):(int,int,bool,int) =
   var increasing = true
@@ -317,109 +318,109 @@ proc merge_high[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, b
 
               # If b runs out during linear merge
               if i < 0:
-                  while j >= a[0]:
-                      lst[k] = lst[j]
-                      k -= 1
-                      j -= 1
-                  return
+                while j >= a[0]:
+                    lst[k] = lst[j]
+                    k -= 1
+                    j -= 1
+                return
 
               if b_count >= gallop_thresh:
-                  break
+                break
 
           else:
-              lst[k] = lst[j]
-              k -= 1
-              j -= 1
+            lst[k] = lst[j]
+            k -= 1
+            j -= 1
 
-              a_count += 1
-              b_count = 0
+            a_count += 1
+            b_count = 0
 
-              # If a runs out during linear merge
-              if j < a[0]:
-                  while i >= 0:
-                      lst[k] = temp_array[i]
-                      k -= 1
-                      i -= 1
-                  return
+            # If a runs out during linear merge
+            if j < a[0]:
+              while i >= 0:
+                lst[k] = temp_array[i]
+                k -= 1
+                i -= 1
+              return
 
-              if a_count >= gallop_thresh:
-                  break
+            if a_count >= gallop_thresh:
+              break
 
       # i, j, k are DECREMENTED in this case
       var a_adv:int
       while true:
-          # Look for the position of b[i] in a[0, j + 1]
-          # ltr = False -> uses bisect_right()
-          a_adv = gallop(lst, temp_array[i], a[0], j + 1, false)
+        # Look for the position of b[i] in a[0, j + 1]
+        # ltr = False -> uses bisect_right()
+        a_adv = gallop(lst, temp_array[i], a[0], j + 1, false)
 
-          # Copy the elements from a_adv -> j to merge area
-          # Go backwards to the index a_adv
-          for x in countdown( a_adv - 1 - 1,j):
-              lst[k] = lst[x]
-              k -= 1
+        # Copy the elements from a_adv -> j to merge area
+        # Go backwards to the index a_adv
+        for x in countdown( a_adv - 1 - 1,j):
+            lst[k] = lst[x]
+            k -= 1
 
-          # # Update the a_count to check successfulness of galloping
-          a_count = j - a_adv + 1
+        # # Update the a_count to check successfulness of galloping
+        a_count = j - a_adv + 1
 
-          # Decrement index j
-          j = a_adv - 1
+        # Decrement index j
+        j = a_adv - 1
 
-          # If run a runs out:
-          if j < a[0]:
-              while i >= 0:
-                  lst[k] = temp_array[i]
-                  k -= 1
-                  i -= 1
-              return
+        # If run a runs out:
+        if j < a[0]:
+          while i >= 0:
+            lst[k] = temp_array[i]
+            k -= 1
+            i -= 1
+          return
 
-          # Copy the b[i] into the merge area
-          lst[k] = temp_array[i]
+        # Copy the b[i] into the merge area
+        lst[k] = temp_array[i]
+        k -= 1
+        i -= 1
+
+        # If a runs out:
+        if i < 0:
+          while j >= a[0]:
+            lst[k] = lst[j]
+            k -= 1
+            j -= 1
+          return
+
+        # -------------------------------------------------
+
+        # Look for the position of A[j] in B:
+        var b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
+        for y in countdown(b_adv - 1 - 1,i):
+          lst[k] = temp_array[y]
           k -= 1
-          i -= 1
 
-          # If a runs out:
-          if i < 0:
-              while j >= a[0]:
-                  lst[k] = lst[j]
-                  k -= 1
-                  j -= 1
-              return
+        b_count = i - b_adv + 1
+        i = b_adv - 1
 
-          # -------------------------------------------------
-
-          # Look for the position of A[j] in B:
-          var b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
-          for y in countdown(b_adv - 1 - 1,i):
-              lst[k] = temp_array[y]
+        # If b runs out:
+        if i < 0:
+          while j >= a[0]:
+              lst[k] = lst[j]
               k -= 1
+              j -= 1
+          return
 
-          b_count = i - b_adv + 1
-          i = b_adv - 1
+        # Copy the a[j] back to the merge area
+        lst[k] = lst[j]
+        k -= 1
+        j -= 1
 
-          # If b runs out:
-          if i < 0:
-              while j >= a[0]:
-                  lst[k] = lst[j]
-                  k -= 1
-                  j -= 1
-              return
+        # If a runs out:
+        if j < a[0]:
+          while i >= 0:
+            lst[k] = temp_array[i]
+            k -= 1
+            i -= 1
+          return
 
-          # Copy the a[j] back to the merge area
-          lst[k] = lst[j]
-          k -= 1
-          j -= 1
-
-          # If a runs out:
-          if j < a[0]:
-              while i >= 0:
-                  lst[k] = temp_array[i]
-                  k -= 1
-                  i -= 1
-              return
-
-          # if galloping proves to be unsuccessful, return to linear
-          if a_count < gallop_thresh and b_count < gallop_thresh:
-              break
+        # if galloping proves to be unsuccessful, return to linear
+        if a_count < gallop_thresh and b_count < gallop_thresh:
+          break
 
       # punishment for leaving galloping
       gallop_thresh += 1
@@ -435,18 +436,18 @@ proc merge_collapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)
   # This loops keeps running until stack has one element
   # or the invariant holds.
   while len(stack) > 1:
-      if len(stack) >= 3 and stack[^3][3] <= stack[^2][3] + stack[^1][3]:
-          if stack[^3][3] < stack[^1][3]:
-              # merge -3 and -2, merge at -3
-              merge(lst, stack, -3)
-          else:
-              # merge -2 and -1, merge at -2
-              merge(lst, stack, -2)
-      elif stack[^2][3] <= stack[^1][3]:
+    if len(stack) >= 3 and stack[^3][3] <= stack[^2][3] + stack[^1][3]:
+      if stack[^3][3] < stack[^1][3]:
+          # merge -3 and -2, merge at -3
+          merge(lst, stack, -3)
+      else:
           # merge -2 and -1, merge at -2
           merge(lst, stack, -2)
-      else:
-          break
+    elif stack[^2][3] <= stack[^1][3]:
+      # merge -2 and -1, merge at -2
+      merge(lst, stack, -2)
+    else:
+      break
 
 
 proc merge_force_collapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]) =
@@ -461,7 +462,7 @@ proc timSort*[T](lst: var openArray[T]):seq[T] =
   # compare:proc (a: T, b: T) :int
   # Starting index
   var s = 0
-
+  
   # Ending index
   var e = len(lst) - 1
 
@@ -473,46 +474,43 @@ proc timSort*[T](lst: var openArray[T]):seq[T] =
   var run: (int, int, bool, int)
   var extend:int
   while s <= e:
+    # Find a run, return [start, end, bool, length]
+    run = count_run(lst, s)
 
-      # Find a run, return [start, end, bool, length]
-      run = count_run(lst, s)
+    # If decreasing, reverse
+    if run[2] == false:
+      reverse(lst, run[0], run[1])
+      # Change bool to True
+      run[2] = true
 
-      # If decreasing, reverse
-      if run[2] == false:
-          reverse(lst, run[0], run[1])
-          # Change bool to True
-          run[2] = true
+    # If length of the run is less than min_run
+    if run[3] < min_run:
+      # The number of indices by which we want to extend the run
+      # either by the distance to the end of the lst
+      # or by the length difference between run and minrun
+      extend = min(min_run - run[3], e - run[1])
 
-      # If length of the run is less than min_run
-      if run[3] < min_run:
-          # The number of indices by which we want to extend the run
-          # either by the distance to the end of the lst
-          # or by the length difference between run and minrun
-          extend = min(min_run - run[3], e - run[1])
+      # Extend the run using binary insertion sort
+      bin_sort(lst, run[0], run[1], extend)
 
-          # Extend the run using binary insertion sort
-          bin_sort(lst, run[0], run[1], extend)
+      # Update last index of the run
+      run[1] = run[1] + extend
 
-          # Update last index of the run
-          run[1] = run[1] + extend
+      # Update the run length
+      run[3] = run[3] + extend
 
-          # Update the run length
-          run[3] = run[3] + extend
+    # Push the run into the stack
+    stack.add(run)
 
-      # Push the run into the stack
-      stack.add(run)
+    # Start merging to maintain the invariant
+    merge_collapse(lst, stack)
 
-      # Start merging to maintain the invariant
-      merge_collapse(lst, stack)
-
-      # Update starting position to find the next run
-      # If run[1] == end of the lst, s > e, loop exits
-      s = run[1] + 1
+    # Update starting position to find the next run
+    # If run[1] == end of the lst, s > e, loop exits
+    s = run[1] + 1
 
   # Some runs might be left in the stack, complete the merging.
   merge_force_collapse(lst, stack)
 
   # Return the lst, ta-da.
-  for x in lst:
-    result.add x
-  return result
+  result = @lst

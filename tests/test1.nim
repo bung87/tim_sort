@@ -22,10 +22,10 @@ let lst3:seq[int] = @[1, 2]
 # Alternating elements
 let lst4 = @[-1,2].cycle 1000
 # Ordered elements with pos and neg values
-let lst5:seq[int] = toSeq(countup(-1000, 1000))
+let lst5:seq[int] = toSeq(countup(-1000, 1000 - 1))
 # [i for i in countup(-1000, 1000)]
 # Inversely ordered elements with pos and neg values
-let lst6:seq[int] = toSeq(countdown(1000, -1000) )
+let lst6:seq[int] = toSeq(countdown(1000, -1000 - 1) )
 # Even number of random ints
 let lst7:seq[int] = collect( newSeq ):
   for i in countup(1, 1000):
@@ -50,10 +50,10 @@ let lst11:seq[int] = collect(newSeq):
 # Full of zeros
 let lst12:seq[int] = collect(newSeq):
   for i in countup(1,1000 ):
-    i
+    0
 # Inversely ordered odd numbers
 let lst13 = collect(newSeq):
-  for i in countdown(9999 - 1, 1, 2):
+  for i in countdown(9999 , 1, 2):
     i
 
 var test_cases = @[lst1, lst2, lst3, lst4, lst5, lst6, lst7,
@@ -83,7 +83,7 @@ test "test sort alt":
     discard timSort(lst)
     # Compare each element to the next element
     for i in countup(1,len(lst)):
-        check lst[i] <= lst[i + 1]
+      check lst[i] <= lst[i + 1]
 
     # Assure that the lengths are the same
     check len(copy) == len(lst)
@@ -93,4 +93,4 @@ test "test sort alt":
 
     # Every element in lst is in copy
     for i in countup(1,len(lst)):
-        check copy[i] == lst[i]
+      check copy[i] == lst[i]
