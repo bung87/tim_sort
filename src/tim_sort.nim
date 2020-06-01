@@ -168,6 +168,7 @@ proc mergeLow[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
   var gallop_thresh = min_gallop
   var a_count = 0  # number of times a win in a row
   var b_count = 0  # number of times b win in a row
+  var a_adv,b_adv:int
   while true:
     a_count = 0
     b_count = 0
@@ -220,7 +221,7 @@ proc mergeLow[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
 
     # If one run is winning consistently, switch to galloping mode.
     # i, j, and k are incremented accordingly
-    var a_adv,b_adv:int
+    
     while true:
       # Look for the position of b[j] in a
       # bisect_left() -> a_adv = index in the slice [i: len(temp_array)]
@@ -331,8 +332,6 @@ proc mergeHigh[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
   var a_count = 0  # number of times a win in a row
   var b_count = 0  # number of times b win in a row
   while true:
-    a_count = 0  
-    b_count = 0  
 
     # Linear merge, taking note of how many times a and b wins in a row.
     # If a_count or b_count > threshold, switch to gallop
