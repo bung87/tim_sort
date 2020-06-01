@@ -1,5 +1,5 @@
 
-const MIN_MERGE = 32
+const MIN_MERGE = 64
 const MIN_GALLOP = 7
 
 proc reverseRange[T](lst:var openArray[T], s, e:int) =
@@ -451,13 +451,14 @@ proc mergeCollapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]
   # This loops keeps running until stack has one element
   # or the invariant holds.
   while len(stack) > 1:
+
     if len(stack) >= 3 and stack[^3][3] <= stack[^2][3] + stack[^1][3]:
       if stack[^3][3] < stack[^1][3]:
-          # merge -3 and -2, merge at -3
-          merge(lst, stack, -3)
+        # merge -3 and -2, merge at -3
+        merge(lst, stack, -3)
       else:
-          # merge -2 and -1, merge at -2
-          merge(lst, stack, -2)
+        # merge -2 and -1, merge at -2
+        merge(lst, stack, -2)
     elif stack[^2][3] <= stack[^1][3]:
       # merge -2 and -1, merge at -2
       merge(lst, stack, -2)
