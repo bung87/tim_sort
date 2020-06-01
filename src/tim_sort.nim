@@ -1,9 +1,23 @@
-import algorithm
 
-func mergeComputeMinRun(n:int) :int= 
+const MIN_MERGE = 32
+const MIN_GALLOP = 7
+
+proc reverseRange[T](lst:var openArray[T], s, e:int) =
+    ## Reverse the order of a list in place
+    ## Input: s = starting index, e = ending index"""
+    var 
+      s = s
+      e = e
+    while s < e and s != e:
+        swap(lst[s], lst[e])
+        s += 1
+        e -= 1
+
+func mergeComputeMinRun(n:int): int= 
+  assert n >= 0
   var r = 0
   var nn = n
-  while result >= 64:
+  while nn >= MIN_MERGE:
     r = r or (nn and 1)
     nn = nn shr 1
   result = nn + r
@@ -30,7 +44,8 @@ func countRun[T](lst:openArray[T],sRun:int):(int,int,bool,int) =
         return (sRun,eRun,increasing,eRun - sRun + 1)
 
 proc binSort[T](lst:var openArray[T];s,e,extend:int) = 
-  var pos,start,ed,value,mid:int
+  var pos,start,ed,mid:int
+  var value:T
   for i in countup(1,extend ):
     pos = 0
     start = s
@@ -57,7 +72,7 @@ proc binSort[T](lst:var openArray[T];s,e,extend:int) =
       lst[x] = lst[x - 1]
     lst[pos] = value
 
-proc bisect_right[T](a: openArray[T]; x:int, lo=0, hi= -1):int = 
+proc bisectRight[T](a: openArray[T]; x:T, lo:int=0, hi:int= -1):int = 
   ## Return the index where to insert item x in list a, assuming a is sorted.
   ## The return value i is such that all e in a[:i] have e <= x, and all e in
   ## a[i:] have e > x.  So if x already appears in the list, a.insert(x) will
@@ -81,7 +96,7 @@ proc bisect_right[T](a: openArray[T]; x:int, lo=0, hi= -1):int =
     else: lo = mid+1
   return lo
 
-proc bisectLeft[T](a: openArray[T], x: T, lo: int = 0, hi: int = -1): int =
+proc bisectLeft[T](a: openArray[T]; x: T; lo: int = 0, hi: int = -1): int =
   # Return the index where to insert item x in list a, assuming a is sorted.
   # The return value i is such that all e in a[:i] have e < x, and all e in
   # a[i:] have e >= x.  So if x already appears in the list, a.insert(x) will
@@ -104,7 +119,7 @@ proc bisectLeft[T](a: openArray[T], x: T, lo: int = 0, hi: int = -1): int =
       hi = mid
   return lo
 
-proc gallop[T](lst:var openArray[T];val,ll,hh:int;ltr:bool):int =
+proc gallop[T](lst:var openArray[T];val:T;ll,hh:int;ltr:bool):int =
   ## Find the index of val in the slice[low:high]
   if ltr == true:
     result = bisectLeft(lst, val, ll, hh)
@@ -123,9 +138,9 @@ proc merge[T](lst:var openArray[T],stack:var seq[(int, int, bool, int)],runNum:i
   stack[index] = newRun
   stack.delete index + 1
   if runA[3] <= runB[3]:
-    mergeLow(lst,runA,runB,7)
+    mergeLow(lst,runA,runB,MIN_GALLOP)
   else:
-    mergeHigh(lst,runA,runB,7)
+    mergeHigh(lst,runA,runB,MIN_GALLOP)
 
 proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int) = 
   ## Merges the two runs quasi in-place if a is the smaller run
@@ -143,14 +158,15 @@ proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, boo
   var j = b[0]
 
   var gallop_thresh = min_gallop
+  var a_count = 0  # number of times a win in a row
+  var b_count = 0  # number of times b win in a row
   while true:
-    var a_count = 0  # number of times a win in a row
-    var b_count = 0  # number of times b win in a row
+    a_count = 0
+    b_count = 0
 
     # Linear merge mode, taking note of how many times a and b wins in a row.
     # If a_count or b_count > threshold, switch to gallop
     while i <= len(temp_array) - 1 and j <= b[1]:
-
       # if elem in a is smaller, a wins
       if temp_array[i] <= lst[j]:
         lst[k] = temp_array[i]
@@ -172,7 +188,6 @@ proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, boo
         # threshold reached, switch to gallop
         if a_count >= gallop_thresh:
             break
-
       # if elem in b is smaller, b wins
       else:
         lst[k] = lst[j]
@@ -195,92 +210,92 @@ proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, boo
         if b_count >= gallop_thresh:
           break
 
-      # If one run is winning consistently, switch to galloping mode.
-      # i, j, and k are incremented accordingly
-      var a_adv,b_adv:int
-      while true:
-        # Look for the position of b[j] in a
-        # bisect_left() -> a_adv = index in the slice [i: len(temp_array)]
-        # so that every elem before temp_array[a_adv] is strictly smaller than lst[j]
-        a_adv = gallop(temp_array, lst[j], i, len(temp_array), true)
+    # If one run is winning consistently, switch to galloping mode.
+    # i, j, and k are incremented accordingly
+    var a_adv,b_adv:int
+    while true:
+      # Look for the position of b[j] in a
+      # bisect_left() -> a_adv = index in the slice [i: len(temp_array)]
+      # so that every elem before temp_array[a_adv] is strictly smaller than lst[j]
+      a_adv = gallop(temp_array, lst[j], i, len(temp_array), true)
 
-        # Copy the elements prior to a_adv to the merge area, increment k
-        for x in countup(i, a_adv - 1):
-          lst[k] = temp_array[x]
+      # Copy the elements prior to a_adv to the merge area, increment k
+      for x in countup(i, a_adv - 1):
+        lst[k] = temp_array[x]
+        k += 1
+
+      # Update the a_count to check successfulness of galloping
+      a_count = a_adv - i
+
+      # Advance i to a_adv
+      i = a_adv
+
+      # If run a runs out
+      if i > len(temp_array) - 1:
+        # Copy all of b over, if there is any left
+        while j <= b[1]:
+          lst[k] = lst[j]
+          k += 1
+          j += 1
+        return
+
+      # Copy b[j] over
+      lst[k] = lst[j]
+      k += 1
+      j += 1
+
+      # If b runs out
+      if j > b[1]:
+        # Copy all of a over, if there is any left
+        while i < len(temp_array):
+          lst[k] = temp_array[i]
+          k += 1
+          i += 1
+        return
+
+        # ------------------------------------------------------
+
+      # Look for the position of a[i] in b
+      # b_adv is analogous to a_adv
+      b_adv = gallop(lst, temp_array[i], j, b[1] + 1, true)
+      for y in countup(j, b_adv - 1):
+          lst[k] = lst[y]
           k += 1
 
-        # Update the a_count to check successfulness of galloping
-        a_count = a_adv - i
+      # Update the counters and check the conditions
+      b_count = b_adv - j
+      j = b_adv
 
-        # Advance i to a_adv
-        i = a_adv
+      # If b runs out
+      if j > b[1]:
+        # copy the rest of a over
+        while i <= len(temp_array) - 1:
+          lst[k] = temp_array[i]
+          k += 1
+          i += 1
+        return
 
-        # If run a runs out
-        if i > len(temp_array) - 1:
-          # Copy all of b over, if there is any left
-          while j <= b[1]:
-            lst[k] = lst[j]
-            k += 1
-            j += 1
-          return
+      # copy a[i] over to the merge area
+      lst[k] = temp_array[i]
+      i += 1
+      k += 1
 
-        # Copy b[j] over
-        lst[k] = lst[j]
-        k += 1
-        j += 1
+      # If a runs out
+      if i > len(temp_array) - 1:
+        # copy the rest of b over
+        while j <= b[1]:
+          lst[k] = lst[j]
+          k += 1
+          j += 1
+        return
 
-        # If b runs out
-        if j > b[1]:
-          # Copy all of a over, if there is any left
-          while i < len(temp_array):
-            lst[k] = temp_array[i]
-            k += 1
-            i += 1
-          return
+      # if galloping proves to be unsuccessful, return to linear
+      if a_count < gallop_thresh and b_count < gallop_thresh:
+        break
 
-          # ------------------------------------------------------
-
-        # Look for the position of a[i] in b
-        # b_adv is analogous to a_adv
-        b_adv = gallop(lst, temp_array[i], j, b[1] + 1, true)
-        for y in countup(j, b_adv - 1):
-            lst[k] = lst[y]
-            k += 1
-
-        # Update the counters and check the conditions
-        b_count = b_adv - j
-        j = b_adv
-
-        # If b runs out
-        if j > b[1]:
-          # copy the rest of a over
-          while i <= len(temp_array) - 1:
-            lst[k] = temp_array[i]
-            k += 1
-            i += 1
-          return
-
-        # copy a[i] over to the merge area
-        lst[k] = temp_array[i]
-        i += 1
-        k += 1
-
-        # If a runs out
-        if i > len(temp_array) - 1:
-          # copy the rest of b over
-          while j <= b[1]:
-            lst[k] = lst[j]
-            k += 1
-            j += 1
-          return
-
-        # if galloping proves to be unsuccessful, return to linear
-        if a_count < gallop_thresh and b_count < gallop_thresh:
-          break
-
-      # punishment for leaving galloping
-      # makes it harder to enter galloping next time
-      gallop_thresh += 1
+    # punishment for leaving galloping
+    # makes it harder to enter galloping next time
+    gallop_thresh += 1
 
 
 proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int) =
@@ -303,6 +318,7 @@ proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
   var j = a[1]
 
   var gallop_thresh = min_gallop
+  var a_adv:int
   while true:
     var a_count = 0  # number of times a win in a row
     var b_count = 0  # number of times b win in a row
@@ -349,7 +365,7 @@ proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
           break
 
     # i, j, k are DECREMENTED in this case
-    var a_adv:int
+    
     while true:
       # Look for the position of b[i] in a[0, j + 1]
       # ltr = False -> uses bisect_right()
@@ -425,7 +441,7 @@ proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
     # punishment for leaving galloping
     gallop_thresh += 1
 
-proc merge_collapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]) =
+proc mergeCollapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]) =
   ## The last three runs in the stack is A, B, C.
   ## Maintains invariants so that their lengths: A > B + C, B > C
   ## Translated to stack positions:
@@ -479,7 +495,7 @@ proc timSort*[T](lst: var openArray[T]):seq[T] =
 
     # If decreasing, reverse
     if run[2] == false:
-      reverse(lst, run[0], run[1])
+      reverseRange(lst, run[0], run[1])
       # Change bool to True
       run[2] = true
 

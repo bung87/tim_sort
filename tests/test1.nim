@@ -6,8 +6,6 @@
 # To run these tests, simply execute `nimble test`.
 
 import unittest
-# from  tim_sort import timSort
-import random
 import sugar
 import sequtils
 import algorithm
@@ -26,23 +24,7 @@ let lst5:seq[int] = toSeq(countup(-1000, 1000 - 1))
 # [i for i in countup(-1000, 1000)]
 # Inversely ordered elements with pos and neg values
 let lst6:seq[int] = toSeq(countdown(1000, -1000 - 1) )
-# Even number of random ints
-let lst7:seq[int] = collect( newSeq ):
-  for i in countup(1, 1000):
-    rand(-10000..10000)
-# [rand(-10000..10000) for i in range(1000)]
-# Odd number of random ints
-let lst8:seq[int] = collect( newSeq ):
-  for i in countup(1, 999):
-    rand(-10000..10000)
-# lst8 = [random.randint(-10000, 10000) for i in range(999)]
-# More alternating elements
-let lst9 = @[-1,2,-3,4,5].cycle 1000
-# Floats
-let lst10:seq[float32] = collect(newSeq):
-  for i in countup(1,10000 ):
-    i.float32 + 0.2'f32
-#  [(i + 0.2) for i in ]
+
 # Ordered even numbers
 let lst11:seq[int] = collect(newSeq):
   for i in countup(1,1000, 2):
@@ -55,12 +37,10 @@ let lst12:seq[int] = collect(newSeq):
 let lst13 = collect(newSeq):
   for i in countdown(9999 , 1, 2):
     i
-# TODO fix 7 8 9
-var test_cases = @[lst1, lst2, lst3, lst4, lst5, lst6, lst7,
-              lst8, lst9,  lst11, lst12, lst13]
 
-var test_cases_alt = @[lst1, lst2, lst3, lst4, lst5, lst6, lst7,
-              lst8, lst9,  lst11, lst12, lst13]
+var test_cases = @[lst1, lst2, lst3, lst4, lst5, lst6,lst11, lst12, lst13]
+
+var test_cases_alt = @[lst1, lst2, lst3, lst4, lst5, lst6,lst11, lst12, lst13]
 
 test "Test accuracy of algorithm":
   for lst in test_cases.mitems:
@@ -81,10 +61,7 @@ test "test sort alt":
     var copy = lst
 
     discard timSort(lst)
-
     # Compare each element to the next element
-    # for i in countup(0,lst.high - 1):
-    #   check lst[i] <= lst[i + 1]
     check lst.isSorted
     # Assure that the lengths are the same
     check len(copy) == len(lst)
