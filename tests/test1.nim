@@ -63,7 +63,7 @@ var test_cases_alt = @[lst1, lst2, lst3, lst4, lst5, lst6, lst7,
               lst8, lst9,  lst11, lst12, lst13]
 
 test "Test accuracy of algorithm":
-  for lst in test_cases:
+  for lst in test_cases.mitems:
     # Make a copy of the case
     var sortable = lst
 
