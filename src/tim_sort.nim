@@ -114,7 +114,7 @@ proc merge_high[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, 
 proc merge_low[T](lst: var openArray[T], a:(int, int, bool, int), b:(int, int, bool, int), min_gallop:int)
 
 proc merge[T](lst:var openArray[T],stack:var seq[(int, int, bool, int)],runNum:int) = 
-  let index = if runNum < 0: stack.high + runNum else: runNum
+  let index = if runNum < 0: stack.len + runNum else: runNum
   var 
     runA = stack[index]
     runB = stack[index + 1]
@@ -143,139 +143,139 @@ proc merge_low[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
 
   var gallop_thresh = min_gallop
   while true:
-      var a_count = 0  # number of times a win in a row
-      var b_count = 0  # number of times b win in a row
+    var a_count = 0  # number of times a win in a row
+    var b_count = 0  # number of times b win in a row
 
-      # Linear merge mode, taking note of how many times a and b wins in a row.
-      # If a_count or b_count > threshold, switch to gallop
-      while i <= len(temp_array) - 1 and j <= b[1]:
+    # Linear merge mode, taking note of how many times a and b wins in a row.
+    # If a_count or b_count > threshold, switch to gallop
+    while i <= len(temp_array) - 1 and j <= b[1]:
 
-          # if elem in a is smaller, a wins
-          if temp_array[i] <= lst[j]:
-              lst[k] = temp_array[i]
-              k += 1
-              i += 1
+      # if elem in a is smaller, a wins
+      if temp_array[i] <= lst[j]:
+        lst[k] = temp_array[i]
+        k += 1
+        i += 1
 
-              a_count += 1
-              b_count = 0
+        a_count += 1
+        b_count = 0
 
-              # If a runs out during linear merge
-              # Copy the rest of b
-              if i > len(temp_array) - 1:
-                  while j <= b[1]:
-                      lst[k] = lst[j]
-                      k += 1
-                      j += 1
-                  return
+        # If a runs out during linear merge
+        # Copy the rest of b
+        if i > len(temp_array) - 1:
+          while j <= b[1]:
+            lst[k] = lst[j]
+            k += 1
+            j += 1
+          return
 
-              # threshold reached, switch to gallop
-              if a_count >= gallop_thresh:
-                  break
+        # threshold reached, switch to gallop
+        if a_count >= gallop_thresh:
+            break
 
-          # if elem in b is smaller, b wins
-          else:
-              lst[k] = lst[j]
-              k += 1
-              j += 1
+      # if elem in b is smaller, b wins
+      else:
+        lst[k] = lst[j]
+        k += 1
+        j += 1
 
-              a_count = 0
-              b_count += 1
+        a_count = 0
+        b_count += 1
 
-              # If b runs out during linear merge
-              # copy the rest of a
-              if j > b[1]:
-                  while i <= len(temp_array) - 1:
-                      lst[k] = temp_array[i]
-                      k += 1
-                      i += 1
-                  return
+        # If b runs out during linear merge
+        # copy the rest of a
+        if j > b[1]:
+          while i <= len(temp_array) - 1:
+            lst[k] = temp_array[i]
+            k += 1
+            i += 1
+          return
 
-              # threshold reached, switch to gallop
-              if b_count >= gallop_thresh:
-                  break
+        # threshold reached, switch to gallop
+        if b_count >= gallop_thresh:
+          break
 
       # If one run is winning consistently, switch to galloping mode.
       # i, j, and k are incremented accordingly
       var a_adv,b_adv:int
       while true:
-          # Look for the position of b[j] in a
-          # bisect_left() -> a_adv = index in the slice [i: len(temp_array)]
-          # so that every elem before temp_array[a_adv] is strictly smaller than lst[j]
-          a_adv = gallop(temp_array, lst[j], i, len(temp_array), true)
+        # Look for the position of b[j] in a
+        # bisect_left() -> a_adv = index in the slice [i: len(temp_array)]
+        # so that every elem before temp_array[a_adv] is strictly smaller than lst[j]
+        a_adv = gallop(temp_array, lst[j], i, len(temp_array), true)
 
-          # Copy the elements prior to a_adv to the merge area, increment k
-          for x in countup(i, a_adv - 1):
-              lst[k] = temp_array[x]
-              k += 1
-
-          # Update the a_count to check successfulness of galloping
-          a_count = a_adv - i
-
-          # Advance i to a_adv
-          i = a_adv
-
-          # If run a runs out
-          if i > len(temp_array) - 1:
-              # Copy all of b over, if there is any left
-              while j <= b[1]:
-                  lst[k] = lst[j]
-                  k += 1
-                  j += 1
-              return
-
-          # Copy b[j] over
-          lst[k] = lst[j]
+        # Copy the elements prior to a_adv to the merge area, increment k
+        for x in countup(i, a_adv - 1):
+          lst[k] = temp_array[x]
           k += 1
-          j += 1
 
-          # If b runs out
-          if j > b[1]:
-              # Copy all of a over, if there is any left
-              while i < len(temp_array):
-                  lst[k] = temp_array[i]
-                  k += 1
-                  i += 1
-              return
+        # Update the a_count to check successfulness of galloping
+        a_count = a_adv - i
+
+        # Advance i to a_adv
+        i = a_adv
+
+        # If run a runs out
+        if i > len(temp_array) - 1:
+          # Copy all of b over, if there is any left
+          while j <= b[1]:
+            lst[k] = lst[j]
+            k += 1
+            j += 1
+          return
+
+        # Copy b[j] over
+        lst[k] = lst[j]
+        k += 1
+        j += 1
+
+        # If b runs out
+        if j > b[1]:
+          # Copy all of a over, if there is any left
+          while i < len(temp_array):
+            lst[k] = temp_array[i]
+            k += 1
+            i += 1
+          return
 
           # ------------------------------------------------------
 
-          # Look for the position of a[i] in b
-          # b_adv is analogous to a_adv
-          b_adv = gallop(lst, temp_array[i], j, b[1] + 1, true)
-          for y in countup(j, b_adv - 1):
-              lst[k] = lst[y]
-              k += 1
+        # Look for the position of a[i] in b
+        # b_adv is analogous to a_adv
+        b_adv = gallop(lst, temp_array[i], j, b[1] + 1, true)
+        for y in countup(j, b_adv - 1):
+            lst[k] = lst[y]
+            k += 1
 
-          # Update the counters and check the conditions
-          b_count = b_adv - j
-          j = b_adv
+        # Update the counters and check the conditions
+        b_count = b_adv - j
+        j = b_adv
 
-          # If b runs out
-          if j > b[1]:
-              # copy the rest of a over
-              while i <= len(temp_array) - 1:
-                  lst[k] = temp_array[i]
-                  k += 1
-                  i += 1
-              return
+        # If b runs out
+        if j > b[1]:
+          # copy the rest of a over
+          while i <= len(temp_array) - 1:
+            lst[k] = temp_array[i]
+            k += 1
+            i += 1
+          return
 
-          # copy a[i] over to the merge area
-          lst[k] = temp_array[i]
-          i += 1
-          k += 1
+        # copy a[i] over to the merge area
+        lst[k] = temp_array[i]
+        i += 1
+        k += 1
 
-          # If a runs out
-          if i > len(temp_array) - 1:
-              # copy the rest of b over
-              while j <= b[1]:
-                  lst[k] = lst[j]
-                  k += 1
-                  j += 1
-              return
+        # If a runs out
+        if i > len(temp_array) - 1:
+          # copy the rest of b over
+          while j <= b[1]:
+            lst[k] = lst[j]
+            k += 1
+            j += 1
+          return
 
-          # if galloping proves to be unsuccessful, return to linear
-          if a_count < gallop_thresh and b_count < gallop_thresh:
-              break
+        # if galloping proves to be unsuccessful, return to linear
+        if a_count < gallop_thresh and b_count < gallop_thresh:
+          break
 
       # punishment for leaving galloping
       # makes it harder to enter galloping next time
