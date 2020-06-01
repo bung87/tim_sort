@@ -88,12 +88,11 @@ proc bisectRight[T](a: openArray[T]; x:T, lo:int=0, hi:int= -1):int =
     raise newException(ValueError, "lo must be non-negative")
   if hi == -1:
       hi = len(a)
-  
   while lo < hi:
     mid = (lo + hi) div 2
     # Use __lt__ to match the logic in list.sort() and in heapq
     if x < a[mid]: hi = mid
-    else: lo = mid+1
+    else: lo = mid + 1
   return lo
 
 proc bisectLeft[T](a: openArray[T]; x: T; lo: int = 0, hi: int = -1): int =
@@ -187,7 +186,7 @@ proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, boo
 
         # threshold reached, switch to gallop
         if a_count >= gallop_thresh:
-            break
+          break
       # if elem in b is smaller, b wins
       else:
         lst[k] = lst[j]
@@ -259,8 +258,8 @@ proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, boo
       # b_adv is analogous to a_adv
       b_adv = gallop(lst, temp_array[i], j, b[1] + 1, true)
       for y in countup(j, b_adv - 1):
-          lst[k] = lst[y]
-          k += 1
+        lst[k] = lst[y]
+        k += 1
 
       # Update the counters and check the conditions
       b_count = b_adv - j
@@ -486,12 +485,12 @@ proc timSort*[T](lst: var openArray[T]):seq[T] =
   var stack:seq[(int, int, bool, int)] = @[]
 
   # Compute min_run using size of lst
-  var min_run = merge_compute_minrun(len(lst))
+  var min_run = mergeComputeMinrun(len(lst))
   var run: (int, int, bool, int)
   var extend:int
   while s <= e:
     # Find a run, return [start, end, bool, length]
-    run = count_run(lst, s)
+    run = countRun(lst, s)
 
     # If decreasing, reverse
     if run[2] == false:
@@ -519,14 +518,14 @@ proc timSort*[T](lst: var openArray[T]):seq[T] =
     stack.add(run)
 
     # Start merging to maintain the invariant
-    merge_collapse(lst, stack)
+    mergeCollapse(lst, stack)
 
     # Update starting position to find the next run
     # If run[1] == end of the lst, s > e, loop exits
     s = run[1] + 1
 
   # Some runs might be left in the stack, complete the merging.
-  merge_force_collapse(lst, stack)
+  mergeForceCollapse(lst, stack)
 
   # Return the lst, ta-da.
   result = @lst
