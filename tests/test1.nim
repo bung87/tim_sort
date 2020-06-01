@@ -45,33 +45,28 @@ var test_cases_alt = @[lst1, lst2, lst3, lst4, lst5, lst6,lst11, lst12, lst13]
 test "Test accuracy of algorithm":
   for lst in test_cases.mitems:
     # Make a copy of the case
-    var sortable = lst.deepCopy
+    var sortable = lst
 
     # Make another copy of the case
-    var sortable_copy = lst.deepCopy
+    var sortable_copy = lst
     var sorted_copy = timSort(sortable_copy)
     check sortable.len == sorted_copy.len
-    check sorted_copy == sortable_copy
-    
-    check sorted_copy == sorted(sortable)
     check sorted_copy.isSorted
     check sortable_copy.isSorted
+    check sorted_copy == sortable_copy
 
 test "test sort alt":
   for lst in test_cases_alt.mitems:
     # Create a copy of the list
-    var copy = lst.deepCopy
+    var copy = lst
 
     discard timSort(copy)
-    # echo lst
+
     # Compare each element to the next element
     check copy.isSorted
     # Assure that the lengths are the same
     check len(copy) == len(lst)
 
     # Sort the copy using default
-    copy.sort()
+    check copy.sorted() == copy
 
-    # Every element in lst is in copy
-    # for i in countup(0,lst.high):
-    #   check copy[i] == lst[i]
