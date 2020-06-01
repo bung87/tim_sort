@@ -138,6 +138,7 @@ proc mergeLow[T](lst: var openArray[T], a:Run, b:Run, min_gallop:int)
 
 proc merge[T](lst:var openArray[T],stack:var seq[Run],runNum:int) = 
   let index = if runNum < 0: stack.len + runNum else: runNum
+  # Make references to the to-be-merged runs
   var 
     runA = stack[index]
     runB = stack[index + 1]
@@ -326,6 +327,7 @@ proc mergeHigh[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
 
   var gallop_thresh = min_gallop
   var a_adv:int
+  var b_adv:int
   var a_count = 0  # number of times a win in a row
   var b_count = 0  # number of times b win in a row
   while true:
@@ -414,7 +416,7 @@ proc mergeHigh[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
         return
 
       # Look for the position of A[j] in B:
-      var b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
+      b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
       for y in countdown(b_adv - 2,i):
         lst[k] = temp_array[y]
         k -= 1

@@ -21,13 +21,13 @@ let lst3:seq[int] = @[1, 2]
 let lst4 = @[-1,2].cycle 1000
 # Ordered elements with pos and neg values
 let lst5:seq[int] = toSeq(countup(-1000, 1000))
-# [i for i in countup(-1000, 1000)]
+
 # Inversely ordered elements with pos and neg values
 let lst6:seq[int] = toSeq(countdown(1000, -1000) )
 
 # Ordered even numbers
 let lst11:seq[int] = collect(newSeq):
-  for i in countup(1,1000, 2):
+  for i in countup(2,1000, 2):
     i
 # Full of zeros
 let lst12:seq[int] = collect(newSeq):

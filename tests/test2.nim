@@ -15,12 +15,12 @@ import tim_sort
 
 # Even number of random ints
 let lst7:seq[int] = collect( newSeq ):
-  for i in countup(1, 1000):
+  for i in countup(0, 1000,2):
     rand(-10000..10000)
 
 # Odd number of random ints
 let lst8:seq[int] = collect( newSeq ):
-  for i in countup(1, 999):
+  for i in countup(1, 999,2):
     rand(-10000..10000)
 
 # More alternating elements
@@ -58,6 +58,3 @@ test "test sort alt":
     check copy.isSorted
     # Assure that the lengths are the same
     check len(copy) == len(lst)
-
-    # Sort the copy using default
-    # check lst.sorted() == copy
