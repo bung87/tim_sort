@@ -1,6 +1,15 @@
+# Took inspiration from Tim Peter's original explanation,
+# https://github.com/python/cpython/blob/master/Objects/listsort.txt
 
 const MIN_MERGE = 64
 const MIN_GALLOP = 7
+
+proc makeTempArray[T](lst:var openArray[T], s, e:int):seq[T] =
+    ## From the lst given, make a copy from index s to index e"""
+    var s = s
+    while s <= e:
+        result.add(lst[s])
+        s += 1
 
 proc reverseRange[T](lst:var openArray[T], s, e:int) =
     ## Reverse the order of a list in place
@@ -9,9 +18,9 @@ proc reverseRange[T](lst:var openArray[T], s, e:int) =
       s = s
       e = e
     while s < e and s != e:
-        swap(lst[s], lst[e])
-        s += 1
-        e -= 1
+      swap(lst[s], lst[e])
+      s += 1
+      e -= 1
 
 func mergeComputeMinRun(n:int): int= 
   assert n >= 0
@@ -41,7 +50,7 @@ func countRun[T](lst:openArray[T],sRun:int):(int,int,bool,int) =
         eRun += 1
         if eRun == lst.len - 1:
           break
-        return (sRun,eRun,increasing,eRun - sRun + 1)
+      return (sRun,eRun,increasing,eRun - sRun + 1)
 
 proc binSort[T](lst:var openArray[T];s,e,extend:int) = 
   var pos,start,ed,mid:int
@@ -148,7 +157,7 @@ proc mergeLow[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, boo
   ## - galloping mode: uses gallop() to 'skip' elements instead of linear merge"""
 
   # Make a copy of the run a, the smaller run
-  var temp_array = lst[ a[0].. a[1]]
+  var temp_array = makeTempArray(lst, a[0], a[1])
   # The first index of the merging area
   var k = a[0]
   # Counter for the temp array of a
@@ -305,7 +314,7 @@ proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
   ## - galloping mode: uses gallop() to 'skip' elements instead of linear merge"""
 
   # Make a copy of b, the smaller run
-  var temp_array = lst[b[0]..b[1]]
+  var temp_array = makeTempArray(lst, b[0], b[1])
 
   # Counter for the merge area, starts at the last index of array b
   var k = b[1]
@@ -318,9 +327,11 @@ proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
 
   var gallop_thresh = min_gallop
   var a_adv:int
+  var a_count = 0  # number of times a win in a row
+  var b_count = 0  # number of times b win in a row
   while true:
-    var a_count = 0  # number of times a win in a row
-    var b_count = 0  # number of times b win in a row
+    a_count = 0  
+    b_count = 0  
 
     # Linear merge, taking note of how many times a and b wins in a row.
     # If a_count or b_count > threshold, switch to gallop
@@ -372,7 +383,7 @@ proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
 
       # Copy the elements from a_adv -> j to merge area
       # Go backwards to the index a_adv
-      for x in countdown( a_adv - 1 - 1,j):
+      for x in countdown( a_adv - 2 ,j):
           lst[k] = lst[x]
           k -= 1
 
@@ -405,7 +416,7 @@ proc mergeHigh[T](lst:var openArray[T], a:(int, int, bool, int), b:(int, int, bo
 
       # Look for the position of A[j] in B:
       var b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
-      for y in countdown(b_adv - 1 - 1,i):
+      for y in countdown(b_adv - 2,i):
         lst[k] = temp_array[y]
         k -= 1
 
@@ -466,7 +477,7 @@ proc mergeCollapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]
       break
 
 
-proc merge_force_collapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]) =
+proc mergeForceCollapse[T](lst:var openArray[T], stack:var seq[(int, int, bool, int)]) =
   ## When the invariant holds and there are > 1 run
   ## in the stack, this function finishes the merging"""
   while len(stack) > 1:
@@ -507,7 +518,7 @@ proc timSort*[T](lst: var openArray[T]):seq[T] =
       extend = min(min_run - run[3], e - run[1])
 
       # Extend the run using binary insertion sort
-      bin_sort(lst, run[0], run[1], extend)
+      binSort(lst, run[0], run[1], extend)
 
       # Update last index of the run
       run[1] = run[1] + extend
