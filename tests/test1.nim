@@ -72,8 +72,8 @@ test "Test accuracy of algorithm":
     var sorted_copy = timSort(sortable_copy)
 
     check sorted_copy == sortable_copy
-    check sorted_copy == sorted(sortable)
-
+    # check sorted_copy == sorted(sortable)
+    check sorted_copy.isSorted
 
 test "test sort alt":
   for lst in test_cases_alt.mitems:
@@ -82,9 +82,9 @@ test "test sort alt":
 
     discard timSort(lst)
     # Compare each element to the next element
-    for i in countup(1,len(lst)):
-      check lst[i] <= lst[i + 1]
-
+    # for i in countup(0,lst.high - 1):
+    #   check lst[i] <= lst[i + 1]
+    check lst.isSorted
     # Assure that the lengths are the same
     check len(copy) == len(lst)
 
@@ -92,5 +92,5 @@ test "test sort alt":
     copy.sort()
 
     # Every element in lst is in copy
-    for i in countup(1,len(lst)):
+    for i in countup(0,lst.high):
       check copy[i] == lst[i]
