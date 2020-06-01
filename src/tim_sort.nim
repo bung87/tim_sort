@@ -10,13 +10,6 @@ type Run = tuple
   ltr:bool
   length:int
 
-proc makeTempArray[T](lst:var openArray[T], s, e:int):seq[T] =
-    ## From the lst given, make a copy from index s to index e"""
-    var s = s
-    while s <= e:
-        result.add(lst[s])
-        s += 1
-
 proc reverseRange[T](lst:var openArray[T], s, e:int) =
     ## Reverse the order of a list in place
     ## Input: s = starting index, e = ending index"""
@@ -86,9 +79,7 @@ proc binSort[T](lst:var openArray[T];s,e,extend:int) =
     for x in countdown(pos - 1,e + i):
       lst[x] = lst[x - 1]
     lst[pos] = value
-  echo "#####"
-  echo lst[s..e]
-  echo "####"
+
 proc bisectRight[T](a: openArray[T]; x:T, lo:int=0, hi:int= -1):int = 
   ## Return the index where to insert item x in list a, assuming a is sorted.
   ## The return value i is such that all e in a[:i] have e <= x, and all e in
