@@ -1,7 +1,9 @@
 # Took inspiration from Tim Peter's original explanation,
 # https://github.com/python/cpython/blob/master/Objects/listsort.txt
+import algorithm
+import sequtils
 
-const MIN_MERGE = 32
+const MIN_MERGE = 64
 const MIN_GALLOP = 7
 
 type Run = tuple
@@ -9,6 +11,20 @@ type Run = tuple
   ed:int
   ltr:bool
   length:int
+
+iterator pyRange*( start = 0, stop = -1, step = 1): int =
+  assert step != 0
+  var
+    i = min(start,stop)
+    stop = max(start,stop)
+  if step >= 1:
+    while i <= stop:
+      yield i
+      i += step
+  else:
+    while stop > i:
+      yield stop
+      stop += step
 
 proc reverseRange[T](lst:var openArray[T], s, e:int) =
     ## Reverse the order of a list in place
@@ -76,7 +92,7 @@ proc binSort[T](lst:var openArray[T];s,e,extend:int) =
         ed = mid - 1
     if start > ed:
       pos = start
-    for x in countdown(pos - 1,e + i):
+    for x in pyRange(e + i , pos,-1):
       lst[x] = lst[x - 1]
     lst[pos] = value
 
@@ -229,7 +245,7 @@ proc mergeLow[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
       a_adv = gallop(temp_array, lst[j], i, len(temp_array), true)
 
       # Copy the elements prior to a_adv to the merge area, increment k
-      for x in countup(i, a_adv - 1):
+      for x in i ..< a_adv:
         lst[k] = temp_array[x]
         k += 1
 
@@ -267,7 +283,7 @@ proc mergeLow[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
       # Look for the position of a[i] in b
       # b_adv is analogous to a_adv
       b_adv = gallop(lst, temp_array[i], j, b[1] + 1, true)
-      for y in countup(j, b_adv - 1):
+      for y in j ..< b_adv:
         lst[k] = lst[y]
         k += 1
 
@@ -332,7 +348,6 @@ proc mergeHigh[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
   var a_count = 0  # number of times a win in a row
   var b_count = 0  # number of times b win in a row
   while true:
-
     # Linear merge, taking note of how many times a and b wins in a row.
     # If a_count or b_count > threshold, switch to gallop
     while i >= 0 and j >= a[0]:
@@ -383,7 +398,7 @@ proc mergeHigh[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
 
       # Copy the elements from a_adv -> j to merge area
       # Go backwards to the index a_adv
-      for x in countdown( a_adv - 2 ,j):
+      for x in pyRange(j , a_adv - 1,-1):
           lst[k] = lst[x]
           k -= 1
 
@@ -416,7 +431,7 @@ proc mergeHigh[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
 
       # Look for the position of A[j] in B:
       b_adv = gallop(temp_array, lst[j], 0, i + 1, false)
-      for y in countdown(b_adv - 2,i):
+      for y in pyRange(i , b_adv - 1,-1):
         lst[k] = temp_array[y]
         k -= 1
 
@@ -462,7 +477,6 @@ proc mergeCollapse[T](lst:var openArray[T], stack:var seq[Run]) =
   # This loops keeps running until stack has one element
   # or the invariant holds.
   while len(stack) > 1:
-
     if len(stack) >= 3 and stack[^3][3] <= stack[^2][3] + stack[^1][3]:
       if stack[^3][3] < stack[^1][3]:
         # merge -3 and -2, merge at -3
@@ -485,17 +499,14 @@ proc mergeForceCollapse[T](lst:var openArray[T], stack:var seq[Run]) =
     # merging would be balanced
     merge(lst, stack, -2)
 
-proc timSort*[T](lst: var openArray[T]):seq[T] = 
+proc timSort*[T](lst: var openArray[T]) = 
   # compare:proc (a: T, b: T) :int
   # Starting index
   var s = 0
-  
   # Ending index
   var e = len(lst) - 1
-
   # The stack
   var stack:seq[Run] = @[]
-
   # Compute min_run using size of lst
   var min_run = mergeComputeMinrun(len(lst))
   var run: Run
@@ -539,5 +550,9 @@ proc timSort*[T](lst: var openArray[T]):seq[T] =
   # Some runs might be left in the stack, complete the merging.
   mergeForceCollapse(lst, stack)
 
-  # Return the lst, ta-da.
+  # # Return the lst, ta-da.
+  # result = @lst
+
+proc timSort2*[T](lst: openArray[T]):seq[T] = 
   result = @lst
+  timSort(result)

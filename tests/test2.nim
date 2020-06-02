@@ -40,10 +40,10 @@ test "Test accuracy of algorithm":
 
     # Make another copy of the case
     var sortable_copy = lst
-    var sorted_copy = timSort(sortable_copy)
+    var sorted_copy = timSort2(sortable_copy)
     check sortable.len == sorted_copy.len
     check sorted_copy.isSorted
-    check sortable_copy.isSorted
+    # check sortable_copy.isSorted
     # check sorted_copy == sortable_copy
 
 test "test sort alt":
@@ -51,7 +51,7 @@ test "test sort alt":
     # Create a copy of the list
     var copy = lst
 
-    discard timSort(copy)
+    timSort(copy)
 
     # Compare each element to the next element
     check copy.isSorted
