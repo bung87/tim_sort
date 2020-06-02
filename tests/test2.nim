@@ -57,3 +57,15 @@ test "test sort alt":
     check copy.isSorted
     # Assure that the lengths are the same
     check len(copy) == len(lst)
+
+test "test sort float":
+
+  # Create a copy of the list
+  var copy = lst10
+
+  timSort(copy)
+
+  # Compare each element to the next element
+  check copy.isSorted
+  # Assure that the lengths are the same
+  check len(copy) == len(lst10)
