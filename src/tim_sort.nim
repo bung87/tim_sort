@@ -31,7 +31,7 @@ proc reverseRange[T](lst:var openArray[T], s, e:int) =
     var 
       s = s
       e = e
-    while s < e and s != e:
+    while s < e:
       swap(lst[s], lst[e])
       s += 1
       e -= 1
@@ -45,7 +45,7 @@ func mergeComputeMinRun(n:int): int=
     nn = nn shr 1
   result = nn + r
 
-func countRun[T](lst:openArray[T],sRun:int):Run =
+func countRun[T](lst:sink openArray[T],sRun:int): Run =
   var increasing = true
   var eRun:int
   if sRun == lst.len - 1:
@@ -157,8 +157,7 @@ proc merge[T](lst:var openArray[T],stack:var seq[Run],runNum:int) =
   var 
     runA = stack[index]
     runB = stack[index + 1]
-    newRun = (run_a[0], run_b[1], true, run_b[1] - run_a[0] + 1)
-  stack[index] = newRun
+  stack[index] = (run_a[0], run_b[1], true, run_b[1] - run_a[0] + 1)
   stack.delete index + 1
   if runA[3] <= runB[3]:
     mergeLow(lst,runA,runB,MIN_GALLOP)
@@ -335,8 +334,7 @@ proc mergeHigh[T](lst:var openArray[T], a:Run, b:Run, min_gallop:int) =
   # Counter for the merge area, starts at the last index of array b
   var k = b[1]
   # Counter for the temp array
-
-  var i = len(temp_array) - 1  # Lower bound is 0
+  var i = b[1] - b[0]  # Lower bound is 0
 
   # Counter for a, starts at the end this time
   var j = a[1]
