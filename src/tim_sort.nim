@@ -2,7 +2,7 @@
 # https://github.com/python/cpython/blob/master/Objects/listsort.txt
 
 
-const MIN_MERGE = 64
+const MIN_MERGE = 32
 const MIN_GALLOP = 7
 
 type Run = tuple
