@@ -498,14 +498,15 @@ proc mergeForceCollapse[T](lst:var openArray[T], stack:var seq[Run]) {.inline.} 
 
 proc timSort*[T](lst: var openArray[T]) = 
   # compare:proc (a: T, b: T) :int
+  let lstLen =  len(lst)
   # Starting index
   var s = 0
   # Ending index
-  var e = len(lst) - 1
+  var e = lstLen - 1
   # The stack
   var stack:seq[Run] = @[]
   # Compute min_run using size of lst
-  var min_run = mergeComputeMinrun(len(lst))
+  var min_run = mergeComputeMinrun(lstLen)
   var run: Run
   var extend:int
   while s <= e:
