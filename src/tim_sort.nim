@@ -1,7 +1,6 @@
 # Took inspiration from Tim Peter's original explanation,
 # https://github.com/python/cpython/blob/master/Objects/listsort.txt
 
-import sequtils
 
 const MIN_MERGE = 64
 const MIN_GALLOP = 7
