@@ -11,7 +11,7 @@ type Run = tuple
   ltr:bool
   length:int
 
-iterator pyRange*( start = 0, stop = -1, step = 1): int =
+iterator pyRange*( start = 0, stop = -1, step = 1): int {.inline.} =
   assert step != 0
   var
     i = min(start,stop)
@@ -25,7 +25,7 @@ iterator pyRange*( start = 0, stop = -1, step = 1): int =
       yield stop
       stop += step
 
-proc reverseRange[T](lst:var openArray[T], s, e:int) =
+proc reverseRange[T](lst:var openArray[T], s, e:int) {.inline.} =
     ## Reverse the order of a list in place
     ## Input: s = starting index, e = ending index"""
     var 
@@ -36,7 +36,7 @@ proc reverseRange[T](lst:var openArray[T], s, e:int) =
       s += 1
       e -= 1
 
-func mergeComputeMinRun(n:int): int= 
+func mergeComputeMinRun(n:int): int {.inline.} = 
   assert n >= 0
   var r = 0
   var nn = n
@@ -45,7 +45,7 @@ func mergeComputeMinRun(n:int): int=
     nn = nn shr 1
   result = nn + r
 
-func countRun[T](lst:sink openArray[T],sRun:int): Run =
+func countRun[T](lst:sink openArray[T],sRun:int): Run {.inline.} =
   var increasing = true
   var eRun:int
   if sRun == lst.len - 1:
@@ -118,7 +118,7 @@ proc bisectRight[T](a: openArray[T]; x:T, lo:int=0, hi:int= -1):int =
     else: lo = mid + 1
   return lo
 
-proc bisectLeft[T](a: openArray[T]; x: T; lo: int = 0, hi: int = -1): int =
+proc bisectLeft[T](a: openArray[T]; x: T; lo: int = 0, hi: int = -1): int {.inline.} =
   # Return the index where to insert item x in list a, assuming a is sorted.
   # The return value i is such that all e in a[:i] have e < x, and all e in
   # a[i:] have e >= x.  So if x already appears in the list, a.insert(x) will
@@ -141,7 +141,7 @@ proc bisectLeft[T](a: openArray[T]; x: T; lo: int = 0, hi: int = -1): int =
       hi = mid
   return lo
 
-proc gallop[T](lst:var openArray[T];val:T;ll,hh:int;ltr:bool):int =
+proc gallop[T](lst:var openArray[T];val:T;ll,hh:int;ltr:bool):int {.inline.}  =
   ## Find the index of val in the slice[low:high]
   if ltr == true:
     result = bisectLeft(lst, val, ll, hh)
@@ -151,7 +151,7 @@ proc gallop[T](lst:var openArray[T];val:T;ll,hh:int;ltr:bool):int =
 proc mergeHigh[T](lst: var openArray[T], a:Run, b:Run, min_gallop:int)
 proc mergeLow[T](lst: var openArray[T], a:Run, b:Run, min_gallop:int)
 
-proc merge[T](lst:var openArray[T],stack:var seq[Run],runNum:int) = 
+proc merge[T](lst:var openArray[T],stack:var seq[Run],runNum:int) {.inline.} = 
   let index = if runNum < 0: stack.len + runNum else: runNum
   # Make references to the to-be-merged runs
   var 
@@ -488,7 +488,7 @@ proc mergeCollapse[T](lst:var openArray[T], stack:var seq[Run]) =
       break
 
 
-proc mergeForceCollapse[T](lst:var openArray[T], stack:var seq[Run]) =
+proc mergeForceCollapse[T](lst:var openArray[T], stack:var seq[Run]) {.inline.}  =
   ## When the invariant holds and there are > 1 run
   ## in the stack, this function finishes the merging"""
   while len(stack) > 1:
