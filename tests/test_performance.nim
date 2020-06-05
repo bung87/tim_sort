@@ -1,8 +1,5 @@
-import times
-import algorithm
+import std/[times, algorithm, random, sugar, stats, monotimes]
 import tim_sort
-import sugar
-import random
 
 # Even number of random ints
 let lst7:seq[int] = collect( newSeq ):
@@ -14,31 +11,29 @@ let lst8:seq[int] = collect( newSeq ):
   for i in countup(1, 9999,2):
     rand(-10000..10000)
 
-var timSortCosts:float
+const IterCount = 500
+var timSortStat: RunningStat
 
 block timSort:
-  var starttime =  cpuTime()
-  var lst1 = lst7
-  var lst2 = lst7
-  for i in 0..<50:
-    
+  for i in 0 ..< IterCount:
+    var lst1 = lst7
+    var lst2 = lst7
+    let curTime = getMonoTime()
     timSort(lst1)
     timSort(lst2)
-  var endtime = cpuTime()
-  timSortCosts = (endtime - starttime)
+    timSortStat.push float((getMonoTime() - curTime).inMicroseconds)
 
-var algorithmCosts:float
+var algoSortStat: RunningStat
 
 block algorithm:
-  var starttime =  cpuTime()
-  var lst1 = lst7
-  var lst2 = lst7
-  for i in 0..<50:
+  for i in 0 ..< IterCount:
+    var lst1 = lst7
+    var lst2 = lst7
+    let curTime = getMonoTime()
     lst1.sort()
     lst2.sort()
-  var endtime = cpuTime()
-  algorithmCosts = (endtime - starttime)
+    algoSortStat.push float((getMonoTime() - curTime).inMicroseconds)
 
-doassert timSortCosts < algorithmCosts
-echo "algorithm lib Costs(seconds):" & $algorithmCosts
-echo "timSort lib Costs(seconds):" & $timSortCosts
+echo "Algorithm ", algoSortStat
+echo "TimSort ", timSortStat
+doAssert timSortStat.mean < algoSortStat.mean
